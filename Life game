@@ -1,0 +1,249 @@
+/**
+ * This is the student's part for Conway's Game of Life Simulator.
+ * You need to finish all functions marked with "TODO" label.
+ * When submitting, you should hand in THIS header file (i.e. game_of_life.h) to OJ to get correct mark.
+ *
+ * By the way, you SHOULD NOT try to read or write any extra information to the console.
+ * Any attempt to hack the OJ or special judger WILL BE voided (and punished if it causes severe results).
+ *
+ * This is part of the 1st homework of Class A and 2nd homework of Class B. The workload isn't large.
+ * We've also prepared a small visualizer for you. Enjoy coding ~
+ */
+#pragma once
+
+#include <iostream>
+#include<string>
+
+/**
+ * Feel free to define/modify variables here.
+ */
+inline int row = -1, col = -1;
+inline bool game_map[500][500]={false};//1：live 0:dead
+// TODO: Your variables here.
+std::string s;
+
+/**
+ * This function is called at the beginning of every game.
+ * Read the initial map of the game from stdin.
+ * The format of the input is written in the problem description.
+ *
+ * TODO: Read the initial map from input and initialize your variables.
+ */
+inline void Initialize()
+{
+    std::cin >>col>>row;
+    // TODO(student): Implement me!
+    int i=0,k=0,m=0;
+    std::getline(std::cin,s,'!');
+    std::cin.ignore();
+    int len=s.length();
+    while(true){
+        int y=0;
+        if(s[i]=='\n'){
+            i++;
+            continue;
+        }
+        if(i==len) break;
+        if(s[i]>='0'&&s[i]<='9'){
+            while(s[i]>='0'&&s[i]<='9'){
+                int a=s[i]-'0';
+                y=10*y+a;
+                i++;
+            }
+            if(s[i]=='b'){
+                for(int j=m;j<m+y;j++){
+                    game_map[k][j]=false;
+                }
+                m=m+y;
+            }else if(s[i]=='o'){
+                for(int j=m;j<m+y;j++){
+                    game_map[k][j]=true;
+                }
+                m=m+y;
+            }else if(s[i]=='$'){
+                k=k+y;
+                m=0;
+            }
+        }else{
+            if(s[i]=='b'){
+                game_map[k][m]=false;
+                m++;
+            }else if(s[i]=='o'){
+                game_map[k][m]=true;
+                m++;
+            }else if(s[i]=='$'){
+                m=0;
+                k++;
+            }
+        }
+        i++;
+        if(i==len) break;
+    }
+}
+
+/**
+ * This function is called once in every round of the game.
+ * You need to simulate a round of game in this program.
+ *
+ * Note: You don't need to input or output anything. Just change the variables you defined so that they're in the new round.
+ *
+ * TODO: Simulate a new round of the game.
+ */
+inline int max(int a,int b){
+    return (a>b)?a:b;
+}
+inline int min(int a,int b){
+    return (a<b)?a:b;
+}
+inline void Tick() {
+  // TODO(student): Implement me!
+    bool game_map_new[500][500]={false};
+    for(int i=0;i<row;i++){
+        for(int j=0;j<col;j++){
+            if(game_map[i][j]){//活的
+                int num=0;
+                for(int k=max(0,i-1);k<=min(row-1,i+1);k++){
+                    for(int l=max(0,j-1);l<=min(col-1,j+1);l++){
+                        if(game_map[k][l]&&(k!=i||l!=j)){
+                            num++;
+                        }
+                    }
+                }
+                if(num<2){
+                    game_map_new[i][j]=false;//人口不足
+                }else if(num<4){
+                    game_map_new[i][j]=true;//存活
+                }else{
+                    game_map_new[i][j]=false;//人口过多
+                }
+            }else{//死的
+                int num=0;
+                for(int k=max(0,i-1);k<=min(row-1,i+1);k++){
+                    for(int l=max(0,j-1);l<=min(col-1,j+1);l++){
+                        if(game_map[k][l]==true&&(k!=i||l!=j)){//周围活的
+                            num++;
+                        }
+                    }
+                }
+                if(num==3){
+                    game_map_new[i][j]=true;//复活
+                }
+            }
+        }
+    }
+    for(int i=0;i<row;i++){
+        for(int j=0;j<col;j++){
+            game_map[i][j]=game_map_new[i][j];
+        }
+    }
+}
+
+/**
+ * This function may be called at any time during the game.
+ * You need to print the map of the game in a certain format.
+ * Output format is written in the problem description.
+ *
+ * Note: In this function, you just needs to print the map. DO NOT simulate a new round of game.
+ *
+ * TODO: Print the whole map.
+ */
+inline void PrintGame() {
+  // TODO(student): Implement me!
+    int numb=0,numo=0,number=0;//缓冲区换行符数量
+    char final='$';//上一个字符
+    std::cout<<col<<" "<<row<<std::endl;
+    for(int r=0;r<row;r++){
+        numb=0;
+        numo=0;
+        for(int c=0;c<col;c++){
+            bool turn=true;
+            for(int i=c;i<col;i++){
+                if(game_map[r][i]){
+                    turn=false;
+                    break;
+                }
+            }
+            if(turn){//可以换行
+                if(final=='o'){
+                    std::cout<<numo<<'o';
+                    numo=0;
+                }else if(final=='b'){
+                    std::cout<<numb<<'b';
+                    numb=0;
+                }
+                number++;//
+                final='$';
+                if(r==row-1){
+                    std::cout<<"!";
+                }
+                break;
+            }else{
+                if(final=='$'){
+                    std::cout<<number<<"$";
+                    number=0;
+                    if(!game_map[r][c]){
+                        final='b';
+                        numb++;
+                    }else{
+                        final='o';
+                        numo++;
+                    }
+                }else if(final=='b'){
+                    if(!game_map[r][c]){
+                        numb++;
+                    }else{
+                        std::cout<<numb<<"b";
+                        numb=0;
+                        numo++;
+                        final='o';
+                    }
+                }else if(final=='o'){
+                    if(game_map[r][c]){
+                        numo++;
+                    }else{
+                        std::cout<<numo<<'o';
+                        numo=0;
+                        numb++;
+                        final='b';
+                    }
+                }
+            }
+            if(c==col-1){
+                if(final=='b'){
+                    std::cout<<numb<<'b';
+                }else if(final=='o'){
+                    std::cout<<numo<<'o';
+                }
+                number++;
+                final='$';
+                if(r==row-1){
+                    std::cout<<"!";
+                }
+            }
+        }
+    }
+    std::cout<<"\n";
+}
+/**
+ * This function may be called at any time during the game.
+ * You need to return the number of live cells.
+ *
+ * @returns the number of live cells in the map.
+ *
+ * Note: In this function, you SHOULD NOT simulate a new round of game or print anything to stdout.
+ *
+ * TODO: Returns the number of live cells.
+ */
+inline int GetLiveCell() {
+    int num=0;
+    for(int i=0;i<row;i++){
+        for(int j=0;j<col;j++){
+            if(game_map[i][j]==true){
+                num++;
+            }
+        }
+    }
+    return num;
+  // TODO(student): Implement me!
+
+}
