@@ -1,0 +1,67 @@
+#include <iostream>
+#include<algorithm>
+#include<vector>
+#include<queue>
+using namespace std;
+int len[60];
+int num=0;
+int answer;
+bool used[60];
+bool dfs(int,int,int);
+int n;
+int sum=0;
+int max(int a,int b) {
+    return(a>b)?a:b;
+}
+
+int main() {
+    cin>>n;
+    int length;
+    queue<int> ans;
+    for(int i=0;i<n;i++) {
+        len[i]=0;
+    }
+    for(int i=0;i<n;i++) {
+        cin>>length;
+        if(length>50) continue;
+        len[num++]=length;
+        sum+=length;
+    }
+    sort(len,len+num);
+    reverse(len,len+num);
+    for(int i=len[0]+1;i<=sum;i++) {
+        if(sum%i==0) {
+            ans.push(i);//存储原来单个木棍长度的可能值
+        }
+    }
+    while(true) {
+        answer=ans.front();
+        ans.pop();
+        for(int i=0;i<num;i++) {
+            used[i]=false;
+        }
+        if(dfs(1,0,0)) {
+            cout<<answer;
+            break;
+        }
+    }
+    return 0;
+}
+
+bool dfs(int finished,int currentlen,int index) {//当前正在拼接的这根木棍最短的一段的序号
+    if(finished>sum/answer) return true;
+    if(currentlen==answer) {
+        return(dfs(finished+1,0,0));
+    }
+    int t=0;
+    for(int i=index;i<num;i++) {
+        if(len[i]<=answer-currentlen&&!used[i]&&t!=len[i]) {
+            used[i]=true;
+            if(dfs(finished,currentlen+len[i],i+1)) return true;
+            used[i]=false;
+            t=len[i];
+            if(currentlen==0||currentlen+len[i]==answer) return false;
+        }
+    }
+    return false;
+}
