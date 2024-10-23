@@ -1,0 +1,113 @@
+#include<iostream>
+#include<algorithm>
+#include<string>
+#include<unordered_map>
+#include<vector>
+struct ranking {
+    std::string name;
+    char gender;
+    int classes;
+    std::vector<int>score;
+    int avg;
+    bool operator<(const ranking&rhs) const {//排序方式
+        if(avg!=rhs.avg) return avg>rhs.avg;
+        for(int i=0;i<9;i++) {
+            if(score[i]!=rhs.score[i]) return score[i]>rhs.score[i];
+        }
+        if(name!=rhs.name) return name<rhs.name;
+    }
+};
+
+int main() {
+    bool startsign=false;//开始标记
+    std::string s;
+    std::vector<ranking> rank;//存储信息仓库
+    std::unordered_map <std::string,int> fork;//存排名
+    while(true) {
+        std::cin >> s ;
+        if(s=="ADD"){
+            if(!startsign) {
+                ranking now;
+                std::string name;
+                std::cin >> name;
+                if(fork.find(name)==fork.end()) {
+                    fork.insert({name,0});
+                    char gender;
+                    std::cin >> gender;
+                    int classes;
+                    std::cin >> classes;
+                    now.name=name;
+                    now.gender=gender;
+                    now.classes=classes;
+                    int score;
+                    int sum=0;
+                    for(int i = 0; i < 9 ; i++ ) {
+                        std:: cin>>score;
+                        now.score.push_back(score);
+                        sum+=score;
+                    }
+                    now.avg=sum/9;
+                    rank.push_back(now);//将当前学生信息存储到排行榜中
+                }else std::cout<<"[Error]Add failed.\n";
+            }else std:: cout<<"[Error]Cannot add student now.\n";
+        }else if(s == "START") {
+            startsign=true;
+            int i=1;
+            std::sort(rank.begin(),rank.end());
+            for(auto &element:rank) {
+                fork[element.name]=i++;
+            }
+        }else if(s =="UPDATE") {
+            std:: string name;
+            std:: cin >> name;
+            if(fork.find(name)==fork.end()) {
+                std:: cout<<"[Error]Update failed.\n";
+            }else {
+                auto it=rank.begin();
+                for(it=rank.begin();it!=rank.end();++it) {
+                    if(it->name==name) {
+                        int code;
+                        std::cin>>code;
+                        int grade;
+                        std::cin>>grade;
+                        it->score.erase(it->score.begin()+code);
+                        it->score.insert(it->score.begin()+code,grade);
+                        int sum=0;
+                        for(int i=0;i<9;i++) {
+                            sum+=it->score[i];
+                        }
+                        it->avg=sum/9;
+                        break;
+                    }
+                }
+            }
+        }else if(s=="FLUSH") {
+            int i=1;
+            std::sort(rank.begin(),rank.end());
+            for(auto element:rank) {
+                fork[element.name]=i++;
+            }
+        }else if(s=="QUERY") {//查询当前学生排名
+            std::string name;
+            std::cin>>name;
+            if(fork.find(name)!=fork.end()) {
+                std::cout<<"STUDENT "<<name<<" NOW AT RANKING "<<fork[name]<<"\n";
+            }else std::cout<<"[Error]Query failed.\n";
+        }else if(s=="PRINTLIST") {
+            int i=1;
+            //std::sort(rank.begin(),rank.end());
+            for(auto element:rank) {
+                std::string gender;
+                if(element.gender=='F') {
+                    gender="female";
+                }else gender="male";
+                std::cout<<i<<" "<<element.name<<" "<<gender<<" "<<element.classes<<" "<<element.avg<<"\n";
+                ++i;
+            }
+        }else if(s=="END") {
+            break;
+        }
+    }
+
+    return 0;
+}
