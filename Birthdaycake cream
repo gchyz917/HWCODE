@@ -1,0 +1,61 @@
+#include <iostream>
+#include<cmath>
+#include<vector>
+#include<climits>
+using namespace std;
+int n,v;
+int MIN=INT_MAX;
+void DFS(int,int,int,int,int);
+int root3(int);
+int square(int);
+int min(int,int);
+
+int main() {
+    cin>>v;
+    cin>>n;
+    DFS(n,0,0,sqrt(v),v);
+    if(MIN<INT_MAX) {
+        cout<<MIN;
+    }else cout<<0;
+
+    return 0;
+}
+void DFS(int i,int takenup,int sum,int r0,int h0) {//层数（设最顶部的一层为第一层） 已占用体积  当前表面积 下面一层的半径 下面一层的高度
+    if(i==0) {
+        if(takenup==v) {
+            MIN=min(MIN,sum);
+        }
+        return;
+    }
+    if(takenup+root3(i)>v) return;
+    if(sum+square(i)>MIN) return;
+    if(sum+2*(v-takenup)/(r0*r0)>MIN) return;
+    for(int r=r0-1;r>=i;r--) {
+        if(i==n) {
+            sum=r*r;
+        }
+        for(int h=min(h0-1,(v-takenup-root3(i-1))/(r*r));h>=i;h--) {
+            DFS(i-1,takenup+r*r*h,sum+2*r*h,r,h);
+        }
+    }
+}
+
+int root3(int k) {
+    int sum=0;
+    for(int i=1;i<=k;i++) {
+        sum+=i*i*i;
+    }
+    return sum;
+}
+
+int square(int k) {
+    int sum=0;
+    for(int i=1;i<=k;i++) {
+        sum+=2*i*i;
+    }
+    return sum;
+}
+
+int min(int a,int b) {
+    return(a<b)?a:b;
+}
